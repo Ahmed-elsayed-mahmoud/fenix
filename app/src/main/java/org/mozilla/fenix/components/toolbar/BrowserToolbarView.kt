@@ -4,10 +4,14 @@
 
 package org.mozilla.fenix.components.toolbar
 
+import android.graphics.Color
 import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.HorizontalScrollView
+import android.widget.LinearLayout
 import androidx.annotation.LayoutRes
 import androidx.annotation.VisibleForTesting
 import androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -25,6 +29,8 @@ import mozilla.components.browser.toolbar.display.DisplayToolbar
 import mozilla.components.support.utils.URLStringUtils
 import mozilla.components.ui.tabcounter.TabCounterMenu
 import org.mozilla.fenix.R
+import org.mozilla.fenix.components.SubTab
+import org.mozilla.fenix.components.subTabTitle
 import org.mozilla.fenix.customtabs.CustomTabToolbarIntegration
 import org.mozilla.fenix.customtabs.CustomTabToolbarMenu
 import org.mozilla.fenix.ext.bookmarkStorage
@@ -74,6 +80,14 @@ class BrowserToolbarView(
     internal var view: BrowserToolbar = layout
         .findViewById(R.id.toolbar)
 
+    @VisibleForTesting
+    internal var linearLayout: LinearLayout = layout
+            .findViewById(R.id.linearLayout1)
+
+    @VisibleForTesting
+    internal var subTabsScrollView: HorizontalScrollView = layout
+            .findViewById(R.id.mainScrollView)
+
     val toolbarIntegration: ToolbarIntegration
 
     @VisibleForTesting
@@ -83,7 +97,7 @@ class BrowserToolbarView(
 
     init {
         val isCustomTabSession = customTabSession != null
-
+        subTabsScrollView.visibility = View.GONE
         view.display.setOnUrlLongClickListener {
             ToolbarPopupWindow.show(
                 WeakReference(view),
@@ -201,6 +215,27 @@ class BrowserToolbarView(
                     engine = components.core.engine
                 )
             }
+        }
+    }
+
+    fun addSubTabs(subTabs: List<SubTab>) {
+        subTabsScrollView.visibility = if (subTabs.isEmpty()) View.GONE else View.VISIBLE
+        linearLayout.removeAllViews()
+        for(subTab in subTabs ) {
+            val btnTag = Button(layout.context)
+            btnTag.text = subTabTitle(subTab)
+            btnTag.isAllCaps = false
+            btnTag.setTextColor(Color.BLACK)
+            btnTag.setBackgroundColor(Color.TRANSPARENT)
+            btnTag.height = ViewGroup.LayoutParams.MATCH_PARENT
+            btnTag.setOnClickListener {
+//                (activity as HomeActivity).openToBrowserAndLoad(
+//                        address,
+//                        newTab = true,
+//                        from = BrowserDirection.FromLoginDetailFragment
+//                )
+            }
+            linearLayout.addView(btnTag)
         }
     }
 

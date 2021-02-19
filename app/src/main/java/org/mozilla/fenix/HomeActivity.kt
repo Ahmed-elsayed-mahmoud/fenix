@@ -30,6 +30,7 @@ import androidx.navigation.NavDirections
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
+import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_home.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -64,12 +65,15 @@ import mozilla.components.support.locale.LocaleAwareAppCompatActivity
 import mozilla.components.support.utils.SafeIntent
 import mozilla.components.support.utils.toSafeIntent
 import mozilla.components.support.webextensions.WebExtensionPopupFeature
+import org.json.JSONObject
 import org.mozilla.fenix.GleanMetrics.Metrics
 import org.mozilla.fenix.addons.AddonDetailsFragmentDirections
 import org.mozilla.fenix.addons.AddonPermissionsDetailsFragmentDirections
+import org.mozilla.fenix.browser.BrowserFragment
 import org.mozilla.fenix.browser.browsingmode.BrowsingMode
 import org.mozilla.fenix.browser.browsingmode.BrowsingModeManager
 import org.mozilla.fenix.browser.browsingmode.DefaultBrowsingModeManager
+import org.mozilla.fenix.components.SubTabsResult
 import org.mozilla.fenix.components.metrics.BreadcrumbsRecorder
 import org.mozilla.fenix.components.metrics.Event
 import org.mozilla.fenix.exceptions.trackingprotection.TrackingProtectionExceptionsFragmentDirections
@@ -110,7 +114,12 @@ import org.mozilla.fenix.tabtray.TabTrayDialogFragmentDirections
 import org.mozilla.fenix.theme.DefaultThemeManager
 import org.mozilla.fenix.theme.ThemeManager
 import org.mozilla.fenix.utils.BrowsersCache
+import java.io.BufferedReader
+import java.io.InputStreamReader
 import java.lang.ref.WeakReference
+import java.net.HttpURLConnection
+import java.net.URL
+import java.net.URLEncoder
 
 /**
  * The main activity of the application. The application is primarily a single Activity (this one)
@@ -727,6 +736,11 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
     ) {
         openToBrowser(from, customTabSessionId)
         load(searchTermOrURL, newTab, engine, forceSearch, flags)
+        try {
+            getSubTabs(searchTermOrURL)
+        } catch (e: Exception) {
+            print("errrrrrrrrrrrrrrror")
+        }
     }
 
     fun openToBrowser(from: BrowserDirection, customTabSessionId: String? = null) {
@@ -832,6 +846,31 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
                 startTime,
                 "newTab: $newTab"
             )
+        }
+    }
+
+    fun getSubTabs(url: String) {
+        var reqParam = URLEncoder.encode("apiVersion", "UTF-8") + "=" + URLEncoder.encode("2", "UTF-8")
+        reqParam += "&" + URLEncoder.encode("url", "UTF-8") + "=" + URLEncoder.encode(url, "UTF-8")
+        val mURL = URL("https://zy6kcqa01a.execute-api.us-east-2.amazonaws.com/prod/subtabs?"+reqParam)
+        with(mURL.openConnection() as HttpURLConnection) {
+            requestMethod = "POST"
+            println("URL : $url")
+            println("Response Code : $responseCode")
+
+            BufferedReader(InputStreamReader(inputStream)).use {
+                val response = StringBuffer()
+
+                var inputLine = it.readLine()
+                while (inputLine != null) {
+                    response.append(inputLine)
+                    inputLine = it.readLine()
+                }
+                val result = Gson().fromJson(response.toString(), SubTabsResult::class.java)
+                println("Response : ${result.subTabs}")
+//                navHost.navController.fr
+                (supportFragmentManager.primaryNavigationFragment?.childFragmentManager?.primaryNavigationFragment as BrowserFragment).browserToolbarView.addSubTabs(result.subTabs)
+            }
         }
     }
 
