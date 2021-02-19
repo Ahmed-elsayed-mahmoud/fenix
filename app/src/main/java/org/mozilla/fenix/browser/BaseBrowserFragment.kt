@@ -948,7 +948,7 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
             try {
                 (activity as HomeActivity).getSubTabs(selectedTab.content.url)
             } catch (e: Exception) {
-                print("errrrrrrrrrrrrrrror")
+                print("Error while fetching subtabs" + e.message)
             }
             view?.let { view ->
                 fullScreenChanged(false)

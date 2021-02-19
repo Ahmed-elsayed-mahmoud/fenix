@@ -4,6 +4,7 @@
 
 package org.mozilla.fenix.components.toolbar
 
+import android.annotation.SuppressLint
 import android.graphics.Color
 import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
@@ -28,6 +29,8 @@ import mozilla.components.browser.toolbar.behavior.BrowserToolbarBehavior
 import mozilla.components.browser.toolbar.display.DisplayToolbar
 import mozilla.components.support.utils.URLStringUtils
 import mozilla.components.ui.tabcounter.TabCounterMenu
+import org.mozilla.fenix.BrowserDirection
+import org.mozilla.fenix.HomeActivity
 import org.mozilla.fenix.R
 import org.mozilla.fenix.components.SubTab
 import org.mozilla.fenix.components.subTabTitle
@@ -219,23 +222,38 @@ class BrowserToolbarView(
     }
 
     fun addSubTabs(subTabs: List<SubTab>) {
-        subTabsScrollView.visibility = if (subTabs.isEmpty()) View.GONE else View.VISIBLE
+        subTabsScrollView.visibility = if (subTabs.size < 2) View.GONE else View.VISIBLE
         linearLayout.removeAllViews()
-        for(subTab in subTabs ) {
-            val btnTag = Button(layout.context)
-            btnTag.text = subTabTitle(subTab)
-            btnTag.isAllCaps = false
-            btnTag.setTextColor(Color.BLACK)
-            btnTag.setBackgroundColor(Color.TRANSPARENT)
-            btnTag.height = ViewGroup.LayoutParams.MATCH_PARENT
-            btnTag.setOnClickListener {
-//                (activity as HomeActivity).openToBrowserAndLoad(
-//                        address,
-//                        newTab = true,
-//                        from = BrowserDirection.FromLoginDetailFragment
-//                )
+        val buttons = mutableListOf<Button>()
+        subTabs.forEach { subTab ->
+            val button = Button(layout.context)
+            button.text = subTabTitle(subTab)
+            button.isAllCaps = false
+            button.setTextColor(Color.BLACK)
+            button.setBackgroundColor(Color.TRANSPARENT)
+            button.height = R.dimen.browser_subtabs_height
+            buttons.add(button)
+            button.setOnClickListener {
+                buttons.forEach { set(it, selected = false) }
+                set(button, selected = true)
+                (container.context as HomeActivity).openToBrowserAndLoad(
+                        subTab.url,
+                        newTab = false,
+                        from = BrowserDirection.FromGlobal
+                )
             }
-            linearLayout.addView(btnTag)
+            set(buttons[0], selected = true)
+            linearLayout.addView(button)
+        }
+    }
+
+    private fun set(button: Button, selected: Boolean) {
+        if (selected) {
+            button.setTextColor(ContextCompat.getColor(container.context, R.color.photonBlue50))
+            button.setBackgroundResource(R.drawable.button_bottom_border)
+        } else {
+            button.setTextColor(Color.BLACK)
+            button.setBackgroundResource(0)
         }
     }
 

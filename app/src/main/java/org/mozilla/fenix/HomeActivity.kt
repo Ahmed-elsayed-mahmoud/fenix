@@ -736,10 +736,12 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
     ) {
         openToBrowser(from, customTabSessionId)
         load(searchTermOrURL, newTab, engine, forceSearch, flags)
-        try {
-            getSubTabs(searchTermOrURL)
-        } catch (e: Exception) {
-            print("errrrrrrrrrrrrrrror")
+        if (from != BrowserDirection.FromGlobal) {
+            try {
+                getSubTabs(searchTermOrURL)
+            } catch (e: Exception) {
+                print("Error while fetching subtabs" + e.message)
+            }
         }
     }
 
