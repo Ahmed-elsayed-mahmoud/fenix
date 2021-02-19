@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android" >
+    <item android:state_pressed="true">
+        <shape>
+            <stroke android:width="2dp" android:color="@color/photonBlue50" />
+            <solid android:color="@color/photonGrey10" />
+
+        </shape>
+    </item>
+
+    <item android:bottom="2dp">
+        <shape>
+            <stroke android:width="2dp" android:color="@color/photonGrey10" />
+            <solid android:color="#00000000" />
+        </shape>
+    </item>
+
+</layer-list>

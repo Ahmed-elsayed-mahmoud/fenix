@@ -39,7 +39,7 @@ object Versions {
 
     const val adjust = "4.18.3"
     const val installreferrer = "1.0"
-
+    const val gson = "2.8.6"
     const val junit = "5.5.2"
     const val mockk = "1.10.0"
 
@@ -191,7 +191,7 @@ object Deps {
 
     const val adjust = "com.adjust.sdk:adjust-android:${Versions.adjust}"
     const val installreferrer = "com.android.installreferrer:installreferrer:${Versions.installreferrer}"
-
+    const val gson = "com.google.code.gson:gson:${Versions.gson}"
     const val jna = "net.java.dev.jna:jna:${Versions.jna}@jar"
 
     const val junit = "junit:junit:${Versions.junit}"

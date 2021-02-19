@@ -323,32 +323,7 @@ class HomeFragment : Fragment() {
     private fun updateLayout(view: View) {
         when (view.context.settings().toolbarPosition) {
             ToolbarPosition.TOP -> {
-                view.toolbarLayout.layoutParams = CoordinatorLayout.LayoutParams(
-                    ConstraintLayout.LayoutParams.MATCH_PARENT,
-                    ConstraintLayout.LayoutParams.WRAP_CONTENT
-                ).apply {
-                    gravity = Gravity.TOP
-                }
 
-                ConstraintSet().apply {
-                    clone(view.toolbarLayout)
-                    clear(view.bottom_bar.id, BOTTOM)
-                    clear(view.bottomBarShadow.id, BOTTOM)
-                    connect(view.bottom_bar.id, TOP, PARENT_ID, TOP)
-                    connect(view.bottomBarShadow.id, TOP, view.bottom_bar.id, BOTTOM)
-                    connect(view.bottomBarShadow.id, BOTTOM, PARENT_ID, BOTTOM)
-                    applyTo(view.toolbarLayout)
-                }
-
-                view.bottom_bar.background = AppCompatResources.getDrawable(
-                    view.context,
-                    view.context.theme.resolveAttribute(R.attr.bottomBarBackgroundTop)
-                )
-
-                view.homeAppBar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                    topMargin =
-                        resources.getDimensionPixelSize(R.dimen.home_fragment_top_toolbar_header_margin)
-                }
             }
             ToolbarPosition.BOTTOM -> {
             }

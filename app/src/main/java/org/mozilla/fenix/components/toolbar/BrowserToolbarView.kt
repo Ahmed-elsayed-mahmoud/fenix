@@ -4,10 +4,15 @@
 
 package org.mozilla.fenix.components.toolbar
 
+import android.annotation.SuppressLint
+import android.graphics.Color
 import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.HorizontalScrollView
+import android.widget.LinearLayout
 import androidx.annotation.LayoutRes
 import androidx.annotation.VisibleForTesting
 import androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -24,7 +29,11 @@ import mozilla.components.browser.toolbar.behavior.BrowserToolbarBehavior
 import mozilla.components.browser.toolbar.display.DisplayToolbar
 import mozilla.components.support.utils.URLStringUtils
 import mozilla.components.ui.tabcounter.TabCounterMenu
+import org.mozilla.fenix.BrowserDirection
+import org.mozilla.fenix.HomeActivity
 import org.mozilla.fenix.R
+import org.mozilla.fenix.components.SubTab
+import org.mozilla.fenix.components.subTabTitle
 import org.mozilla.fenix.customtabs.CustomTabToolbarIntegration
 import org.mozilla.fenix.customtabs.CustomTabToolbarMenu
 import org.mozilla.fenix.ext.bookmarkStorage
@@ -74,6 +83,14 @@ class BrowserToolbarView(
     internal var view: BrowserToolbar = layout
         .findViewById(R.id.toolbar)
 
+    @VisibleForTesting
+    internal var linearLayout: LinearLayout = layout
+            .findViewById(R.id.linearLayout1)
+
+    @VisibleForTesting
+    internal var subTabsScrollView: HorizontalScrollView = layout
+            .findViewById(R.id.mainScrollView)
+
     val toolbarIntegration: ToolbarIntegration
 
     @VisibleForTesting
@@ -83,7 +100,7 @@ class BrowserToolbarView(
 
     init {
         val isCustomTabSession = customTabSession != null
-
+        subTabsScrollView.visibility = View.GONE
         view.display.setOnUrlLongClickListener {
             ToolbarPopupWindow.show(
                 WeakReference(view),
@@ -201,6 +218,42 @@ class BrowserToolbarView(
                     engine = components.core.engine
                 )
             }
+        }
+    }
+
+    fun addSubTabs(subTabs: List<SubTab>) {
+        subTabsScrollView.visibility = if (subTabs.size < 2) View.GONE else View.VISIBLE
+        linearLayout.removeAllViews()
+        val buttons = mutableListOf<Button>()
+        subTabs.forEach { subTab ->
+            val button = Button(layout.context)
+            button.text = subTabTitle(subTab)
+            button.isAllCaps = false
+            button.setTextColor(Color.BLACK)
+            button.setBackgroundColor(Color.TRANSPARENT)
+            button.height = R.dimen.browser_subtabs_height
+            buttons.add(button)
+            button.setOnClickListener {
+                buttons.forEach { set(it, selected = false) }
+                set(button, selected = true)
+                (container.context as HomeActivity).openToBrowserAndLoad(
+                        subTab.url,
+                        newTab = false,
+                        from = BrowserDirection.FromGlobal
+                )
+            }
+            set(buttons[0], selected = true)
+            linearLayout.addView(button)
+        }
+    }
+
+    private fun set(button: Button, selected: Boolean) {
+        if (selected) {
+            button.setTextColor(ContextCompat.getColor(container.context, R.color.photonBlue50))
+            button.setBackgroundResource(R.drawable.button_bottom_border)
+        } else {
+            button.setTextColor(Color.BLACK)
+            button.setBackgroundResource(0)
         }
     }
 
